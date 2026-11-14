@@ -105,6 +105,13 @@ int APIENTRY wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmd
     bool forcePlay = false;
 #endif
 
+    std::wstring customGamePath = L"";
+
+    // RecompLauncher inicia directamente sin pasar por el launcher de escritorio
+    if (GetEnvironmentVariableW(L"RECOMPLAUNCHER", nullptr, 0) > 0) {
+        forcePlay = true;
+    }
+
     if (argc > 1) {
         for (int i = 1; i < argc; ++i) {
             std::wstring arg = argv[i];
@@ -112,6 +119,8 @@ int APIENTRY wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmd
                 forceGui = true;
             } else if (arg == L"--play" || arg == L"-p" || arg == L"--direct") {
                 forcePlay = true;
+            } else if ((arg == L"--game" || arg == L"--app0") && i + 1 < argc) {
+                customGamePath = argv[++i];
             } else {
                 engineArgs.push_back(arg);
             }
@@ -197,7 +206,44 @@ int APIENTRY wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmd
         }
     } else {
         std::wstring bootBin = exeDir + L"\\out\\p3d_test\\boot-linked.bin";
+        if (GetFileAttributesW(bootBin.c_str()) == INVALID_FILE_ATTRIBUTES) {
+            std::wstring candidate = exeDir + L"\\boot-linked.bin";
+            if (GetFileAttributesW(candidate.c_str()) != INVALID_FILE_ATTRIBUTES) {
+                bootBin = candidate;
+            } else {
+                candidate = exeDir + L"\\bin\\boot-linked.bin";
+                if (GetFileAttributesW(candidate.c_str()) != INVALID_FILE_ATTRIBUTES) {
+                    bootBin = candidate;
+                }
+            }
+        }
+
         std::wstring app0Dir = exeDir + L"\\CUSA12636";
+        if (!customGamePath.empty()) {
+            std::wstring directEboot = customGamePath + L"\\eboot.bin";
+            std::wstring subEboot = customGamePath + L"\\CUSA12636\\eboot.bin";
+            if (GetFileAttributesW(directEboot.c_str()) != INVALID_FILE_ATTRIBUTES) {
+                app0Dir = customGamePath;
+            } else if (GetFileAttributesW(subEboot.c_str()) != INVALID_FILE_ATTRIBUTES) {
+                app0Dir = customGamePath + L"\\CUSA12636";
+            } else {
+                app0Dir = customGamePath;
+            }
+        } else {
+            std::wstring iniGamePath = ReadIniValue(iniPath, L"game_path", L"");
+            if (!iniGamePath.empty()) {
+                std::wstring directEboot = iniGamePath + L"\\eboot.bin";
+                std::wstring subEboot = iniGamePath + L"\\CUSA12636\\eboot.bin";
+                if (GetFileAttributesW(directEboot.c_str()) != INVALID_FILE_ATTRIBUTES) {
+                    app0Dir = iniGamePath;
+                } else if (GetFileAttributesW(subEboot.c_str()) != INVALID_FILE_ATTRIBUTES) {
+                    app0Dir = iniGamePath + L"\\CUSA12636";
+                } else {
+                    app0Dir = iniGamePath;
+                }
+            }
+        }
+
         cmdLine += L" \"" + bootBin + L"\" --app0 \"" + app0Dir + L"\"";
         for (const auto& arg : engineArgs) {
             cmdLine += L" \"" + arg + L"\"";

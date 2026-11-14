@@ -561,7 +561,7 @@ int main(int argc, char **argv) {
         else if (!strcmp(argv[i], "--strict-imports")) strict_imports = 1;
         else if (!strcmp(argv[i], "--check-imports")) check_imports = 1;
         else if (!strcmp(argv[i], "--content-profile") && i+1<argc) content_profile=argv[++i];
-        else if (!strcmp(argv[i], "--app0") && i+1<argc) app0=argv[++i];
+        else if ((!strcmp(argv[i], "--app0") || !strcmp(argv[i], "--game")) && i+1<argc) app0=argv[++i];
         else if (!strcmp(argv[i], "--user") && i+1<argc) user_dir=argv[++i];
         else if (!strcmp(argv[i], "--patches") && i+1<argc) patch_file=argv[++i];
         else if (!strcmp(argv[i], "--isa-rewrite") && i+1<argc) isa_file=argv[++i];

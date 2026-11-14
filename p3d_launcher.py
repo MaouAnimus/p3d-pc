@@ -918,10 +918,28 @@ class P3DModernLauncher(QMainWindow):
             return
 
         cmd = [str(target_exe)]
-        if not BOOT_BIN.is_file() or not (APP0_DIR / "eboot.bin").is_file():
-            QMessageBox.critical(self, "Faltan archivos del juego", "Se necesitan out/p3d_test/boot-linked.bin y CUSA12636/eboot.bin.")
+        boot_candidate = BOOT_BIN
+        if not boot_candidate.is_file():
+            if (ROOT_DIR / "boot-linked.bin").is_file():
+                boot_candidate = ROOT_DIR / "boot-linked.bin"
+            elif (BIN_DIR / "boot-linked.bin").is_file():
+                boot_candidate = BIN_DIR / "boot-linked.bin"
+
+        app0_path = APP0_DIR
+        game_path_setting = self.cfg.get("game_path")
+        if game_path_setting:
+            gp = Path(game_path_setting)
+            if (gp / "eboot.bin").is_file():
+                app0_path = gp
+            elif (gp / "CUSA12636" / "eboot.bin").is_file():
+                app0_path = gp / "CUSA12636"
+            elif gp.is_dir():
+                app0_path = gp
+
+        if not boot_candidate.is_file() or not (app0_path / "eboot.bin").is_file():
+            QMessageBox.critical(self, "Faltan archivos del juego", f"Se necesitan {boot_candidate} y {app0_path / 'eboot.bin'}.")
             return
-        cmd.extend([str(BOOT_BIN), "--app0", str(APP0_DIR), "--user", str(USER_DIR)])
+        cmd.extend([str(boot_candidate), "--app0", str(app0_path), "--user", str(USER_DIR)])
 
         env = launch_environment(self.cfg, ROOT_DIR, CONFIG_FILE)
 
