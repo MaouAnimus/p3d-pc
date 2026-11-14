@@ -1,0 +1,182 @@
+{
+  "$schema": "https://recomplauncher.com/schema/recomplauncher.json",
+  "format": 1,
+  "name": "Persona 3: Dancing in Moonlight",
+  "repo": "MaouAnimus/p3d-pc",
+  "game": {
+    "kind": "folder",
+    "label": "Your dumped PS4 game folder (CUSA12636) with eboot.bin and sce_sys.",
+    "check": {
+      "file": "eboot.bin",
+      "ids": ["CUSA12636"]
+    }
+  },
+  "start": {
+    "program": ["Jugar.exe", "p3d_launcher.exe", "bin/p3d_engine.exe", "p3d.exe"],
+    "args": ["--play", "--game", "{game}"],
+    "env": {
+      "GOW3_CONFIG": "{install}/p3d.ini",
+      "GOW3_GPU_USER_DIR": "{install}/user"
+    }
+  },
+  "config": [
+    {
+      "id": "main",
+      "format": "ini",
+      "file": [
+        { "path": "{install}/p3d.ini" }
+      ],
+      "game_path": "game_path",
+      "new": {
+        "display_mode": "fullscreen",
+        "output_res": "1920x1080",
+        "render_resolution": "native",
+        "vsync": "1",
+        "fps_limit": "60",
+        "engine_fps": "60",
+        "frames_queued": "1",
+        "async_shaders": "1",
+        "upscaler": "off",
+        "fsr1": "0",
+        "rcas": "1",
+        "rcas_strength": "75",
+        "anisotropy": "8",
+        "show_fps": "0",
+        "anti_aliasing": "rcas",
+        "close_on_launch": "0"
+      }
+    }
+  ],
+  "folders": {
+    "saves": [
+      { "path": "{install}/user" }
+    ],
+    "logs": [
+      { "path": "{install}" }
+    ],
+    "screenshots": [
+      { "path": "{install}/user/screenshots" }
+    ]
+  },
+  "saves": [
+    "{install}/user/**",
+    "{install}/p3d.ini"
+  ],
+  "looks": {
+    "graphics": "vulkan"
+  },
+  "exit_codes": {
+    "0": "ok",
+    "20": "Your CPU does not support the required x86-64 instruction set extensions."
+  },
+  "settings": [
+    {
+      "id": "display_mode",
+      "label": "Display mode",
+      "help": "Fullscreen fills your screen. Borderless uses your desktop resolution. Windowed uses Output resolution.",
+      "choices": [
+        { "label": "Fullscreen", "set": { "display_mode": "fullscreen" } },
+        { "label": "Borderless", "set": { "display_mode": "borderless" } },
+        { "label": "Windowed", "set": { "display_mode": "windowed" } }
+      ],
+      "defaults": { "display_mode": "fullscreen" }
+    },
+    {
+      "id": "resolution",
+      "label": "Output resolution",
+      "help": "Window or fullscreen display resolution. Internal rendering is native 1080p.",
+      "choices": [
+        { "label": "1080p (1920x1080)", "set": { "output_res": "1920x1080" } },
+        { "label": "1440p (2560x1440)", "set": { "output_res": "2560x1440" } },
+        { "label": "4K (3840x2160)", "set": { "output_res": "3840x2160" } },
+        { "label": "720p (1280x720)", "set": { "output_res": "1280x720" } },
+        { "label": "Ultrawide (2560x1080)", "set": { "output_res": "2560x1080" } },
+        { "label": "Ultrawide 1440p (3440x1440)", "set": { "output_res": "3440x1440" } }
+      ],
+      "defaults": { "output_res": "1920x1080" }
+    },
+    {
+      "id": "fps_limit",
+      "label": "Frame rate",
+      "help": "60 FPS matches the console's rhythm timing and intro speed. 30 FPS limits performance on lower-end hardware.",
+      "choices": [
+        { "label": "60 FPS (Original)", "set": { "fps_limit": "60", "engine_fps": "60" } },
+        { "label": "30 FPS", "set": { "fps_limit": "30", "engine_fps": "60" } }
+      ],
+      "defaults": { "fps_limit": "60", "engine_fps": "60" }
+    },
+    {
+      "id": "vsync",
+      "label": "V-Sync",
+      "help": "Synchronizes frame presentation with the display refresh rate to eliminate tearing.",
+      "choices": [
+        { "label": "On", "set": { "vsync": "1" } },
+        { "label": "Off", "set": { "vsync": "0" } }
+      ],
+      "defaults": { "vsync": "1" }
+    },
+    {
+      "id": "anisotropy",
+      "label": "Texture filtering",
+      "help": "Sharpens textures viewed at oblique angles, keeping dance stages and floor details clear.",
+      "choices": [
+        { "label": "8x (Default)", "set": { "anisotropy": "8" } },
+        { "label": "16x (High)", "set": { "anisotropy": "16" } },
+        { "label": "4x", "set": { "anisotropy": "4" } },
+        { "label": "2x", "set": { "anisotropy": "2" } },
+        { "label": "Game default", "set": { "anisotropy": "0" } }
+      ],
+      "defaults": { "anisotropy": "8" }
+    },
+    {
+      "id": "rcas",
+      "label": "RCAS sharpening",
+      "help": "AMD Robust Contrast Adaptive Sharpening enhances character cel-shading clarity at 1080p.",
+      "choices": [
+        { "label": "On", "set": { "rcas": "1", "anti_aliasing": "rcas" } },
+        { "label": "Off", "set": { "rcas": "0", "anti_aliasing": "off" } }
+      ],
+      "defaults": { "rcas": "1", "anti_aliasing": "rcas" }
+    },
+    {
+      "id": "async_shaders",
+      "label": "Async shaders",
+      "help": "Compiles shaders asynchronously in the background to prevent stutter during dances.",
+      "choices": [
+        { "label": "On", "set": { "async_shaders": "1" } },
+        { "label": "Off", "set": { "async_shaders": "0" } }
+      ],
+      "defaults": { "async_shaders": "1" }
+    },
+    {
+      "id": "show_fps",
+      "label": "Show FPS",
+      "help": "Displays an on-screen frame rate counter overlay.",
+      "choices": [
+        { "label": "Off", "set": { "show_fps": "0" } },
+        { "label": "On", "set": { "show_fps": "1" } }
+      ],
+      "defaults": { "show_fps": "0" }
+    }
+  ],
+  "actions": [
+    {
+      "id": "saves",
+      "label": "Saves",
+      "help": "Open folder containing user saves and profiles.",
+      "open": "saves"
+    },
+    {
+      "id": "logs",
+      "label": "Logs",
+      "help": "Open folder containing crash and runtime logs.",
+      "open": "logs"
+    },
+    {
+      "id": "screenshots",
+      "label": "Screenshots",
+      "help": "Open folder containing screenshots taken in game.",
+      "open": "screenshots"
+    }
+  ]
+}

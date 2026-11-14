@@ -5,6 +5,8 @@
 [![License](https://img.shields.io/badge/License-GPL--2.0--or--later-green.svg)](LICENSE)
 [![Audio](https://img.shields.io/badge/Audio-WASAPI%20Exclusive-purple.svg)]()
 
+<a href="https://recomplauncher.com"><picture><source media="(prefers-color-scheme: dark)" srcset="https://recomplauncher.com/assets/press/launcher/badge-light.svg"><img alt="Get it on RecompLauncher" src="https://recomplauncher.com/assets/press/launcher/badge-dark.svg" height="48"></picture></a>
+
 Port nativo para PC de ***Persona 3: Dancing in Moonlight*** (`CUSA12636`) mediante **ejecución directa de código de máquina x86-64 en CPU host** y **traducción dinámica de comandos GPU GNM a Vulkan**, desacoplado de emuladores de consola tradicionales.
 
 ---
