@@ -63,7 +63,8 @@ p3d-pc/
 │   │   ├── data.cpk
 │   │   └── ps4.cpk
 │   └── sce_sys/
-├── Jugar.bat
+├── p3d_launcher.exe
+├── Jugar.exe
 └── ...
 ```
 
