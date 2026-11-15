@@ -49,14 +49,14 @@ Port nativo para PC de ***Persona 3: Dancing in Moonlight*** (`CUSA12636`) media
 
 ### 1. Clonar el Repositorio
 ```bash
-git clone https://github.com/MaouAnimus/persona-3-dancing-pc-port.git
-cd persona-3-dancing-pc-port
+git clone https://github.com/MaouAnimus/p3d-pc.git
+cd p3d-pc
 ```
 
 ### 2. Aportar los Archivos del Juego
 Coloca tu volcado de PS4 en la carpeta raíz del proyecto bajo el nombre `CUSA12636`:
 ```
-persona-3-dancing-pc-port/
+p3d-pc/
 ├── CUSA12636/
 │   ├── eboot.bin
 │   ├── data/
