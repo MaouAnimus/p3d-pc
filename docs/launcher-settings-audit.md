@@ -20,7 +20,7 @@ El launcher, `Jugar.exe` y el motor compilado ya leen la misma configuración. L
 
 | Ajuste o acción | Problema encontrado | Comportamiento actual |
 |---|---|---|
-| Límite de FPS | Guardaba 144 sin trasladarlo al reloj de vídeo; el parser tampoco aceptaba 144. | 30/60/120/144/240 se transmiten al limitador y a la frecuencia de vídeo. 120/144/240 están identificados como experimentales. |
+| Límite de FPS | Guardaba 144 sin trasladarlo al reloj de vídeo; el parser tampoco aceptaba 144. | Selector fijado en 60 FPS con opción reducida de 30 FPS. Valores experimentales de 120/144/240 fueron retirados para evitar aceleración de intro y lógica rítmica. |
 | Ilimitado | No representaba una presentación realmente ilimitada. | Retirado del selector; las configuraciones antiguas sin límite se normalizan a 60 al guardar. |
 | Resolución de salida | Se guardaba, pero la ventana arrancaba usando otras dimensiones. | La ventana usa el tamaño seleccionado. El backend acepta también 2560×1080 y 3440×1440. |
 | Pantalla completa | Siempre pedía el modo del escritorio, aunque se hubiese elegido otro tamaño. | Busca un modo del monitor con las dimensiones solicitadas y refresco cercano al escritorio. Si no existe, registra que utiliza el escritorio. |

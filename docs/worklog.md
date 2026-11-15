@@ -158,3 +158,37 @@
   * **Yukari y Junpei (33s):** Modelos 100% íntegros, expresiones faciales vivas, cel-shading nítido, cabello suave sin facetas oscuras y cuadro de diálogo ("Maybe we should just go back to sleep") perfectamente legible.
   * **Aigis y Ken Amada (55s):** Articulaciones robóticas doradas de Aigis, vestuario de Ken y reflejos de bola de discoteca renderizados con fidelidad absoluta y cero artefactos.
 
+## Sesión: 2026-11-14 — 2026-11-15
+**Objetivo de la sesión:** Saneamiento documental P0/P1, integración de RecompLauncher, diagnóstico y resolución de arranque de launcher `.exe`, soporte para CPUs sin `MOVBE` (AMD Kaveri), auditoría de telemetría y consolidación del flujo en ejecutables nativos.
+
+**Diagnóstico y Causas Identificadas:**
+1. **Fallo de apertura del Launcher GUI (`p3d_launcher.exe`):**
+   - `p3d_launcher.exe` invoca `pythonw p3d_launcher.pyw` para evitar ventanas de consola negras.
+   - El entorno host carecía de `PySide6`. `pythonw` sufría `ModuleNotFoundError` y terminaba de forma silenciosa sin mostrar ningún error en pantalla.
+2. **Cierre inmediato del motor por falta de `MOVBE` en CPU host:**
+   - En procesadores como el AMD A10-7860K (Kaveri / Steamroller), la CPU no implementa por hardware la instrucción `MOVBE`.
+   - El motor detenía la ejecución de inmediato al inicio con el mensaje `STOP: this CPU lacks MOVBE and no rewrite table matches the image`.
+3. **Redundancia de scripts por lotes (`.bat`):**
+   - La existencia de `Jugar.bat` y `Launcher.bat` generaba confusión en los usuarios finales cuando ya existían `Jugar.exe` y `p3d_launcher.exe`.
+
+**Soluciones Implementadas:**
+1. **Saneamiento del Launcher:**
+   - Instalación de `PySide6` (Qt 6.12) en el entorno de ejecución.
+   - Modificación de `p3d_launcher.pyw` con interceptor de excepciones no controladas mediante `MessageBoxW` nativo de Windows y registro en `launcher_crash.log`.
+2. **Soporte de Reescritura ISA (`isa-rewrite.bin`):**
+   - Instalación de `iced-x86` y ejecución de `engine/scripts/isa_rewrite.py` sobre `boot-linked.bin`.
+   - Detección de 2.032 sitios (209 MOVBE, 1.733 BMI1, 90 LZCNT). Los sitios más calientes (`0x25dda7`, etc., ejecutados más de 16.000 veces) fueron reescritos en saltos nativos directos `JMP` sin traps de interrupción `int3`.
+   - Actualización de `p3d_launcher.py` y `p3d_launcher.cpp` para inyectar automáticamente `--isa-rewrite isa-rewrite.bin`.
+3. **Auditoría de Rendimiento en Hardware Real:**
+   - Verificación sobre GPU dedicada NVIDIA GeForce GTX 1050 (Vulkan 1.3, VSync Fifo, streams de audio SDL3/WASAPI y decodificación de vídeo CRI Mana).
+   - Reconstrucción limpia de la caché de shaders (`user/cache/`) específica para la GPU host.
+4. **Limpieza y Consolidación Ejecutable:**
+   - Eliminación de `Jugar.bat` y `Launcher.bat`.
+   - Eliminación de archivos temporales obsoletos (`p3d_launcher.py.bak`, `runtime.c.bak`, `runtime_memory.c.bak`, `runtime_rwlock.c.bak`).
+   - Actualización del paquete distribuible `Persona3Dancing-v1.0.0-Windows-x64.zip`.
+5. **Soporte RecompLauncher:**
+   - Generación y validación de `recomplauncher.json` contra el esquema oficial.
+   - Incorporación de assets requeridos: icono 512x512 y capturas de pantalla de gameplay a 1080p.
+6. **Matriz de Imports CUSA12636:**
+   - Auditoría exhaustiva de los 532 imports de `analysis.json` y 622 referencias de `link.json`, documentada en `docs/cusa12636-import-matrix.md`.
+

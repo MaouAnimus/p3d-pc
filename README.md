@@ -1,24 +1,46 @@
-# Persona 3: Dancing in Moonlight — PC Native Port
+# Persona 3: Dancing in Moonlight — PC Compatibility Runtime
 
 [![Platform](https://img.shields.io/badge/Platform-Windows%20x64-blue.svg)](https://microsoft.com/windows)
 [![API](https://img.shields.io/badge/Graphics-Vulkan%201.3-red.svg)](https://www.vulkan.org/)
-[![License](https://img.shields.io/badge/License-GPL--2.0--or--later-green.svg)](LICENSE)
-[![Audio](https://img.shields.io/badge/Audio-WASAPI%20Exclusive-purple.svg)]()
+[![License](https://img.shields.io/badge/License-GPL--2.0-green.svg)](LICENSE)
+[![Audio](https://img.shields.io/badge/Audio-SDL3%20Streams-purple.svg)]()
+[![Input](https://img.shields.io/badge/Input-SDL3%20Gamepad-orange.svg)]()
 
 <a href="https://recomplauncher.com"><picture><source media="(prefers-color-scheme: dark)" srcset="https://recomplauncher.com/assets/press/launcher/badge-light.svg"><img alt="Get it on RecompLauncher" src="https://recomplauncher.com/assets/press/launcher/badge-dark.svg" height="48"></picture></a>
 
-Port nativo para PC de ***Persona 3: Dancing in Moonlight*** (`CUSA12636`) mediante **ejecución directa de código de máquina x86-64 en CPU host** y **traducción dinámica de comandos GPU GNM a Vulkan**, desacoplado de emuladores de consola tradicionales.
+Runtime experimental de compatibilidad para Windows x64 de ***Persona 3: Dancing in Moonlight*** (`CUSA12636`).
+
+El proyecto combina la **ejecución directa de código de máquina huésped x86-64 en la CPU del PC** con una **capa de compatibilidad de servicios de sistema PS4 a nivel de host** y la **traducción dinámica de comandos de GPU GNM a Vulkan 1.3**.
+
+> **English Summary:**  
+> `p3d-pc` is an experimental Windows x64 compatibility runtime for *Persona 3: Dancing in Moonlight* (PS4, Title ID `CUSA12636`). It explores direct execution of the original PS4 x86-64 machine code on host CPUs, paired with host-side implementations of selected PlayStation 4 system services and translation of GNM/PM4 graphics commands to Vulkan 1.3. Requires user-provided game files.
 
 ---
 
-## 🚀 Características Principales
+## 🔬 Estado Experimental y Alcance del Runtime
 
-- **0% Emulación de CPU:** El binario original de PS4 corre como código de máquina x86-64 nativo directamente sobre la CPU del host (Intel / AMD), sin recompiladores JIT ni capas de virtualización pesadas.
-- **Backend Vulkan Moderno:** Traductor de comandos de GPU Liverpool (GNM/PM4) a Vulkan 1.3 con soporte de renderizado dinámico (`VK_KHR_dynamic_rendering`).
-- **Sincronización Estricta de Modelos 3D:** Renderizado cel-shading de alta fidelidad con mallas de personajes (Yukari, Junpei, Aigis, Ken, Makoto), contornos de tinta invertida (*inverted hull cel-outline*) y sincronización de matrices de huesos en tiempo real.
-- **Audio de Ultra Baja Latencia:** Implementación nativa de `libSceAudioOut` sobre Windows WASAPI (48 kHz, punto flotante estéreo).
-- **Cinemáticas y Video en Tiempo Real:** Decodificación fluida de flujos de video CRI Sofdec2 / MPV.
-- **Soporte de Mandos y Teclado:** Compatibilidad plug-and-play con mandos de Xbox, PlayStation (XInput/DirectInput) y controles de teclado mapeados.
+Este proyecto se encuentra en **desarrollo activo**. La compatibilidad es parcial y depende de los contratos de servicios implementados, la CPU del host y el controlador Vulkan:
+
+- **Ejecución directa de código huésped:** Las instrucciones x86-64 del juego corren de forma nativa sobre la CPU host (Intel/AMD). No es un emulador de CPU interpretado ni JIT, pero sí requiere adaptación de ABI, manejo de TLS, emulación de llamadas al sistema y, en CPUs sin instrucción `MOVBE` (como AMD Kaveri/Steamroller), reescritura estática de instrucciones mediante tablas ISA (`isa-rewrite.bin`).
+- **Servicios de sistema intencionalmente acotados:**
+  - **Entorno offline y monousuario:** Se emula un único usuario local (`User ID 1`). La red (`NetCtl`) se reporta como desconectada y PlayStation Network (`PSN`) como no iniciada.
+  - **Diálogos de sistema:** Diálogos comunes (`libSceMsgDialog`, `libSceSaveDataDialog`) se resuelven con contratos automáticos inmediatos; no se dibuja la interfaz gráfica de usuario del sistema operativo de PS4.
+  - **Contenido y PlayGo:** El proveedor de `AppContent` opera en perfil offline del juego base; no se implementa montaje dinámico de DLC comerciales ni descargas.
+- **Gráficos Vulkan 1.3:** Traductor de comandos de GPU Liverpool (GNM/PM4) a Vulkan con soporte de sombreadores cel-shading y renderizado dinámico (`VK_KHR_dynamic_rendering`).
+- **Audio y Entrada sobre SDL3:**
+  - `libSceAudioOut` implementado sobre streams de audio de **SDL3** (remuestreo estéreo flotante a 48 kHz con control de cola).
+  - `libScePad` implementado sobre el subsistema de mandos de **SDL3** (PlayStation, Xbox, DirectInput) con mapeo alternativo en teclado.
+
+---
+
+## 🏛️ Estructura del Repositorio: Separación de Proyectos
+
+El repositorio alberga dos líneas de trabajo que no deben confundirse:
+
+1. **Línea Principal — Runtime de Compatibilidad (`engine/` / `p3d.exe`):**  
+   El motor principal. Carga el ejecutable original de PS4 `CUSA12636` (`eboot.bin` -> `boot-linked.bin`), enlaza las dependencias dinámicas por NID (`link_modules.py`), implementa las APIs del sistema en `engine/src/runtime.c` y traduce el flujo de comandos gráficos a Vulkan 1.3.
+2. **Línea Secundaria — Recreación Arcade Nativa (`native/`):**  
+   Proyecto histórico de investigación desarrollado en C++20 y Direct3D 11. No ejecuta el ejecutable de PS4, sino que recrea la mecánica rítmica de la canción "Burn My Dread" utilizando los modelos 3D y pistas de audio previamente extraídos de los paquetes CPK.
 
 ---
 
@@ -44,8 +66,8 @@ Port nativo para PC de ***Persona 3: Dancing in Moonlight*** (`CUSA12636`) media
 
 ## 📦 Instrucciones de Instalación y Uso (BYOG)
 
-> [!NOTE]  
-> Este repositorio **NO** contiene código con derechos de autor, imágenes de disco, binarios propietarios ni assets comerciales de Atlus o SEGA. Se requiere que el usuario aporte su propia copia legítima del juego de PS4 (*Bring Your Own Game*).
+> [!IMPORTANT]  
+> Este repositorio **NO** distribuye código con derechos de autor, imágenes de disco, binarios propietarios ni assets comerciales de Atlus o SEGA. Se requiere que el usuario aporte su propia copia legítima del juego de PS4 (*Bring Your Own Game*).
 
 ### 1. Clonar el Repositorio
 ```bash
@@ -68,38 +90,29 @@ p3d-pc/
 └── ...
 ```
 
-### 3. Obtener el Motor Compilado
-- **Opción A (Binarios precompilados):** Descarga el archivo de lanzamiento desde la sección de [Releases](../../releases) y extrae `p3d.exe` y `boot-linked.bin` en sus respectivas carpetas.
-- **Opción B (Compilar desde código fuente):**
-  Requiere [MSYS2 Clang64](https://www.msys2.org/) con Ninja y CMake:
-  ```powershell
-  $env:PATH = "C:\msys64\clang64\bin;$env:PATH"
-  ninja -C engine/out/gpu p3d
-  ```
+### 3. Iniciar el Juego y Configuración
+El flujo de usuario opera exclusivamente a través de ejecutables nativos:
+- **Launcher con Interfaz Gráfica (Recomendado):** Haz doble clic en [`p3d_launcher.exe`](p3d_launcher.exe) para abrir la interfaz, ajustar opciones de vídeo/controles y pulsar **▶ JUGAR**. (Requiere Python 3.10+ con PySide6 en el entorno host; conserva los scripts auxiliares `p3d_launcher.py`, `p3d_launcher.pyw`, `p3d_settings.py` y `design/launcher/`).
+- **Jugar con Ajustes Guardados:** Haz doble clic en [`Jugar.exe`](Jugar.exe) para iniciar de forma directa e inmediata con la configuración de [`p3d.ini`](p3d.ini), sin abrir la interfaz gráfica.
+- **Línea de Comandos / RecompLauncher:** Admite el parámetro `--game <ruta>` o `--app0 <ruta>` y `--play` para integrarse con lanzadores externos.
 
-### 4. Iniciar el Juego y Configuración
-Tienes varias formas cómodas de jugar:
-- **Launcher con Interfaz Gráfica (Recomendado):** Haz doble clic en [`p3d_launcher.exe`](p3d_launcher.exe) para abrir la interfaz y configurar los gráficos. Incluye las animaciones de los desplegables. Requiere Python con PySide6 instalado y disponible en PATH; conserva `p3d_launcher.py`, `p3d_launcher.pyw`, `p3d_settings.py` y la carpeta `design/launcher` junto al ejecutable.
-- **Jugar con los ajustes guardados:** Haz doble clic en [`Jugar.exe`](Jugar.exe) para iniciar directamente con la configuración de [`p3d.ini`](p3d.ini), sin abrir la interfaz ni usar archivos `.bat`. También puedes usar `p3d_launcher.exe --play`.
-- **Motor sin launcher:** `p3d.exe` y `bin/p3d_engine.exe` son los ejecutables del motor; para el uso habitual, utiliza uno de los dos accesos anteriores.
-
-Para reconstruir ambos accesos ejecutables, ejecuta `powershell -ExecutionPolicy Bypass -File tools/build_launchers.ps1`. El script utiliza MSYS2 CLANG64, enlaza sus bibliotecas de ejecución estáticamente y conserva los ejecutables anteriores en `out/launcher-backups/`.
-
-Los ajustes se guardan con **Guardar ajustes** o al pulsar **JUGAR**, y se aplican al siguiente inicio del juego. La resolución de salida modifica el tamaño de la ventana o el modo de pantalla completa; sin bordes usa el escritorio. El render interno sigue siendo nativo (1920×1080). RCAS solo se aplica si la salida coincide con ese tamaño. FSR 1/3 y las escalas internas que aún no tienen implementación para Persona están deshabilitados.
-
-El reloj original se mantiene a **60 Hz**: subirlo aceleraba la intro y el título. Los valores antiguos de 120/144/240 FPS vuelven a 60, incluso al iniciar desde los `.exe` sin abrir el formulario. El selector ofrece 60 FPS y un límite reducido de 30 FPS. Los FPS altos solo durante gameplay requieren una detección fiable de fase y separar la simulación del renderizado; esa función todavía no está implementada. La notificación del decodificador de vídeo no distingue título y gameplay. VSync puede reducir la tasa al refresco del modo de pantalla seleccionado.
-
-Verificación del launcher: `python tools/test_p3d_launcher_settings.py`. Pruebas de integración con el juego real: `python tools/audit_launcher_runtime.py` (abre varias ventanas de juego durante periodos acotados y utiliza configuraciones y partidas aisladas). Los registros y resultados quedan en `out/settings-audit/`.
+### 4. Ajustes Gráficos y Limitador de Tasa de Cuadros
+- Los ajustes se guardan en [`p3d.ini`](p3d.ini) con **Guardar ajustes** o al iniciar el juego.
+- La resolución interna de renderizado de Persona 3 Dancing es nativa a **1080p (1920×1080)**.
+- El reloj de sincronización se mantiene a **60 Hz** (con selector de 60 FPS y límite reducido de 30 FPS). Desbloquear la tasa de cuadros global altera la velocidad del juego y las secuencias introductorias; tasas mayores (120/144 FPS) requerirán desacoplar el bucle de simulación rítmica del bucle de renderizado.
 
 ---
 
-## 📚 Documentación Técnica y Arquitectura
+## 📚 Documentación Técnica y Auditorías
 
-Para detalles de las sesiones de ingeniería inversa, diagnósticos de estabilidad y soluciones aplicadas:
 - [Diario de Trabajo de Ingeniería Inversa (Worklog)](docs/worklog.md)
+- [Matriz de Imports y Servicios del Huésped CUSA12636](docs/cusa12636-import-matrix.md)
+- [Auditoría del Launcher y Ajustes de Rendimiento](docs/launcher-settings-audit.md)
 
 ---
 
 ## ⚖️ Aviso Legal
 
-Este proyecto es una reimplementación de interoperabilidad de código limpio (*clean-room interoperability*) con fines educativos y de investigación sobre la arquitectura x86-64 y la API Vulkan. *Persona*, *Persona 3: Dancing in Moonlight*, sus personajes y su banda sonora son marcas comerciales y propiedad intelectual registrada de **ATLUS / SEGA**.
+Este proyecto es una investigación independiente de código limpio (*clean-room engineering*) con fines de preservación digital e interoperabilidad de software sobre la arquitectura x86-64 y la API Vulkan.
+
+*Persona*, *Persona 3: Dancing in Moonlight*, sus personajes, marcas registradas, diálogos, cinemáticas y bandas sonoras son propiedad intelectual exclusiva de **ATLUS / SEGA**. Este proyecto no está respaldado, asociado ni autorizado por ATLUS ni SEGA.
