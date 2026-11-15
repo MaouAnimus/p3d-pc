@@ -2,15 +2,31 @@
 title Persona 3 Dancing Launcher
 cd /d "%~dp0"
 
-where pythonw >nul 2>nul
-if %ERRORLEVEL% EQU 0 (
-    start "" pythonw "%~dp0p3d_launcher.pyw"
+set "PYW="
+if exist "%LOCALAPPDATA%\Programs\Python\Python312\pythonw.exe" set "PYW=%LOCALAPPDATA%\Programs\Python\Python312\pythonw.exe"
+if not defined PYW (
+    for /d %%D in ("%LOCALAPPDATA%\Programs\Python\Python3*") do if exist "%%D\pythonw.exe" set "PYW=%%D\pythonw.exe"
+)
+if not defined PYW (
+    where pythonw >nul 2>nul && set "PYW=pythonw"
+)
+
+if defined PYW (
+    start "" "%PYW%" "%~dp0p3d_launcher.pyw"
     exit /b 0
 )
 
-where python >nul 2>nul
-if %ERRORLEVEL% EQU 0 (
-    start "" python "%~dp0p3d_launcher.py"
+set "PY="
+if exist "%LOCALAPPDATA%\Programs\Python\Python312\python.exe" set "PY=%LOCALAPPDATA%\Programs\Python\Python312\python.exe"
+if not defined PY (
+    for /d %%D in ("%LOCALAPPDATA%\Programs\Python\Python3*") do if exist "%%D\python.exe" set "PY=%%D\python.exe"
+)
+if not defined PY (
+    where python >nul 2>nul && set "PY=python"
+)
+
+if defined PY (
+    start "" "%PY%" "%~dp0p3d_launcher.py"
     exit /b 0
 )
 

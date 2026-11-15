@@ -245,6 +245,23 @@ int APIENTRY wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmd
         }
 
         cmdLine += L" \"" + bootBin + L"\" --app0 \"" + app0Dir + L"\"";
+
+        std::wstring isaBin = exeDir + L"\\out\\p3d_test\\isa-rewrite.bin";
+        if (GetFileAttributesW(isaBin.c_str()) == INVALID_FILE_ATTRIBUTES) {
+            std::wstring candidate = exeDir + L"\\isa-rewrite.bin";
+            if (GetFileAttributesW(candidate.c_str()) != INVALID_FILE_ATTRIBUTES) {
+                isaBin = candidate;
+            } else {
+                candidate = exeDir + L"\\bin\\isa-rewrite.bin";
+                if (GetFileAttributesW(candidate.c_str()) != INVALID_FILE_ATTRIBUTES) {
+                    isaBin = candidate;
+                }
+            }
+        }
+        if (GetFileAttributesW(isaBin.c_str()) != INVALID_FILE_ATTRIBUTES) {
+            cmdLine += L" --isa-rewrite \"" + isaBin + L"\"";
+        }
+
         for (const auto& arg : engineArgs) {
             cmdLine += L" \"" + arg + L"\"";
         }

@@ -941,6 +941,13 @@ class P3DModernLauncher(QMainWindow):
             return
         cmd.extend([str(boot_candidate), "--app0", str(app0_path), "--user", str(USER_DIR)])
 
+        isa_candidate = boot_candidate.parent / "isa-rewrite.bin"
+        if not isa_candidate.is_file():
+            if (ROOT_DIR / "isa-rewrite.bin").is_file():
+                isa_candidate = ROOT_DIR / "isa-rewrite.bin"
+        if isa_candidate.is_file():
+            cmd.extend(["--isa-rewrite", str(isa_candidate)])
+
         env = launch_environment(self.cfg, ROOT_DIR, CONFIG_FILE)
 
         self.btn_play.setEnabled(False)
